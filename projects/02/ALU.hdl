@@ -42,5 +42,44 @@ CHIP ALU {
         ng; // 1 if (out < 0),  0 otherwise
 
     PARTS:
-   // Put you code here:
+    // perform all required operations
+    
+
+    // use multiplexors to direct correct output
+    // zero out x if zx = 1
+    Mux16(a=x,b[0..15]=false,sel=zx,out=zeroXOutput);
+    Not16(in=zeroXOutput,out=notZeroXOutput);
+    // choose final X input based on nx
+    Mux16(a=zeroXOutput,b=notZeroXOutput,sel=nx,out=finalXInput);
+
+    // zero out Y if zy = 1
+    Mux16(a=y,b[0..15]=false,sel=zy,out=zeroYOutput);
+    Not16(in=zeroYOutput,out=notZeroYOutput);
+    // choose final Y based on ny
+    Mux16(a=zeroYOutput,b=notZeroYOutput,sel=ny,out=finalYInput);
+    
+    // Add x + y which will be used if f = 1
+    Add16(a=finalXInput,b=finalYInput,out=aPlusb);
+    // And x & y which will be used if f = 0
+    And16(a=finalXInput,b=finalYInput,out=aAndb);
+
+    // select primary computation based on f
+    Mux16(a=aAndb,b=aPlusb,sel=f,out=tempOut);
+    // calculate !computation
+    Not16(in=tempOut,out=notTempOut);
+
+    // select a candidateOutput based on no control bit
+    Mux16(a=tempOut,b=notTempOut,sel=no,out=candidateOut);
+
+    // Check if all bits are zero
+    Or16Way(in=candidateOut,out=oredCandidateOut);
+    // set zr to opposite of orred output
+    Not(in=oredCandidateOut,out=zr);
+
+    // set ng to the MSB and drop all other bits of the output, using a OR gate
+    // there might be other way to do this
+    And16(a[0..15]=true,b=candidateOut,out[15]=ng,out[0..14]=drop);
+
+    // just pass candidateOut as is into Out; nice trick
+    Or16(a=candidateOut,b[0..15]=false,out=out);
 }
