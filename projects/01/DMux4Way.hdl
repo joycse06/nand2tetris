@@ -16,5 +16,10 @@ CHIP DMux4Way {
     OUT a, b, c, d;
 
     PARTS:
-    // Put your code here:
+    // Group the signal to either AB or CD group
+    DMux(in=in,sel=sel[1],a=ab,b=cd);
+
+    // Now Distribute the signal to either of the groups
+    DMux(in=ab,sel=sel[0],a=a,b=b);
+    DMux(in=cd,sel=sel[0],a=c,b=d);
 }
