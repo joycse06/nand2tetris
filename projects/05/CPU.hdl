@@ -39,5 +39,53 @@ CHIP CPU {
         pc[15];          // address of next instruction
 
     PARTS:
-    // Put your code here:
+    // Instruction passthrough
+    Or(a=false,b=instruction[15],out=isComputation);
+    Not(in=instruction[15], out=notAComputation);
+    Or16(a=instruction, b=false, out[0..14]=instructionAddress);
+    // First Mux
+    Mux16(a=aluOut,b=instruction,sel=notAComputation,out[0..14]=instructionOut);
+
+    // A Register
+    // ARegister(in[0..14]=instructionOut,in[15]=false,load=instruction[5],out=aRegisterOut);
+    And(a=instruction[5],b=isComputation,out=loadForComputation);
+    Or(a=notAComputation,b=loadForComputation,out=loadARegister);
+    ARegister(in[0..14]=instructionOut,in[15]=false,load=loadARegister,out=aRegisterOut);
+
+    // D Register
+    And(a=instruction[4],b=isComputation,out=loadDForComputation);
+    And(a=isComputation,b=loadDForComputation,out=loadDRegister);
+    DRegister(in=aluOut,load=loadDRegister,out=dRegisterOut);
+
+    // writeM
+    And(a=instruction[15],b=instruction[3],out=writeM);
+
+    // addressM
+    Or16(a[0..15]=false, b=aRegisterOut, out[0..14]=addressM);
+
+    // Second Mux16
+    Mux16(a=aRegisterOut,b=inM,sel=instruction[12],out=secondMuxOut);
+
+    // Program Counter
+    // is Negative?
+    And(a=instruction[2],b=aluNgOut, out=isNegative);
+    And(a=instruction[1],b=aluZrOut, out=isZero);
+    Not(in=aluNgOut,out=notNg);
+    Not(in=aluZrOut,out=notZero);
+    And(a=notNg,b=notZero,out=notNgOrZero);
+    And(a=instruction[0],b=notNgOrZero, out=isPositive);
+
+    Or8Way(in[3..7]=false, in[2]=isNegative, in[1]=isZero, in[0]=isPositive, out=shouldLoadPC);
+
+    And(a=shouldLoadPC,b=isComputation,out=shouldActuallyLoadPC);
+
+    Not(in=shouldActuallyLoadPC, out=shouldNotLoadPC);
+
+    Or(a=shouldNotLoadPC,b=notAComputation,out=shouldInc);
+
+    PC(reset=reset,in=aRegisterOut,load=shouldActuallyLoadPC,inc=shouldInc,out[0..14]=pc);
+
+    // ALU
+    ALU(x=dRegisterOut,y=secondMuxOut,zx=instruction[11],nx=instruction[10],zy=instruction[9],ny=instruction[8],f=instruction[7],no=instruction[6],zr=aluZrOut,ng=aluNgOut,out=aluOut);
+    Or16(a=aluOut,b=false,out=outM);
 }
