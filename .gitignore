@@ -1,1 +1,4 @@
 *.dat
+.DS_Store
+assembler-xcode
+target
