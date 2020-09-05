@@ -2,12 +2,15 @@
 #include <iostream>
 
 Parser::Parser(std::istream &file_stream) : vm_file_stream(file_stream) {
-  // vm_file_stream = &file_stream;
-  // vm_file_stream->clear();
-  // vm_file_stream->seekg(0);
-  // std::string temp;
-  // if(std::getline(*vm_file_stream, temp))
-  //   std::cout << "First Line: " << temp;
+  // if this is not done, then it's garbage value will sometimes be true sometimes false
+  // so will exhibit undefined behaviour
+
+  this->end_of_file_reached = false;
+  current_command_tokens.reserve(3);
+}
+
+std::string Parser::getCurrentCommand() {
+  return current_command;
 }
 
 bool Parser::hasMoreCommands() {
@@ -35,12 +38,15 @@ void Parser::advance() {
 
   size_t pos = 0;
   pos = sanitised_line.find(" ");
+  current_command_tokens.clear();
+  std::string current_token;
+  std::stringstream ss(sanitised_line);
 
-  if(pos != std::string::npos) {
-    first_token = sanitised_line.substr(0, pos);
-  } else {
-    first_token = sanitised_line;
+  while(std::getline(ss, current_token, ' ')) {
+    this->current_command_tokens.push_back(current_token); 
   }
+
+  first_token = current_command_tokens.at(0);
 
   if(first_token == "add" || first_token == "sub"
       || first_token == "neg"
@@ -54,7 +60,7 @@ void Parser::advance() {
   else if(first_token == "push")
     this->current_command_type = C_PUSH;
   else if(first_token == "pop")
-    this->current_command_type = C_PUSH;
+    this->current_command_type = C_POP;
   else if (first_token == "label")
     this->current_command_type = C_PUSH;
   else if (first_token == "goto")
@@ -70,7 +76,7 @@ void Parser::advance() {
   else
     throw std::runtime_error("Unknown command found");
 
-  std::cout << std::endl << "//" << sanitised_line;
+  // std::cout << std::endl << "//" << sanitised_line;
   this->current_command = sanitised_line;
 }
 
@@ -79,9 +85,14 @@ CommandType Parser::commandType() {
 }
 
 std::string Parser::arg1() {
-  return "first arg";
+  if (this->current_command_tokens.size() > 1)
+    return this->current_command_tokens.at(1); 
+  else
+    return this->current_command_tokens.at(0); 
 }
 
-int Parser::arg2() { return 0; }
+int Parser::arg2() {
+  return std::stoi(current_command_tokens.at(2));
+}
 
 

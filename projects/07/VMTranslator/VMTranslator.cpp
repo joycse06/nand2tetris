@@ -3,6 +3,7 @@
 #include <string>
 #include "StringUtils.h"
 #include "Parser.h"
+#include "CodeGenerator.h"
 #include <filesystem>
 
 void read_vm_lines(std::ifstream &vm_path_stream) {
@@ -47,35 +48,41 @@ int main(int argc, char** argv) {
     return 1;
   }
 
-  asm_file_stream << "Hello World 2!";
-  std::cout << "Hello World 2!" << std::endl;
+  // asm_file_stream << "Hello World 2!";
+  // std::cout << "Hello World 2!" << std::endl;
+
+  std::string temp;
+
+  // std::getline(vm_file_stream, temp);
+
+  // std::cout << "First Line: " << temp << std::endl;
 
   // We can now proceed with parsing
   Parser parser(vm_file_stream);
   CommandType current_command_type;
+  // CodeGenerator code_generator(std::cout);
+  CodeGenerator code_generator(asm_file_stream);
 
   // enter into Parse -> CodeGen Loop
   while(parser.hasMoreCommands()) {
     parser.advance();
+    asm_file_stream << "// " << parser.getCurrentCommand() << std::endl;
+    // std::cout << std::endl << "// " << parser.getCurrentCommand() << std::endl;
     current_command_type = parser.commandType();
-    std::cout << std::endl;
     
     switch(current_command_type) {
       case C_ARITHMATIC:
-        std::cout << "Arithmatic command!" << std::endl;
+        // std::cout << "Arithmatic command! arg1: " << parser.arg1() << std::endl;
+        code_generator.writeArithmatic(parser.arg1());
         break;
       case C_PUSH:
-        std::cout << "Push command!" << std::endl;
-        break;
       case C_POP:
-        std::cout << "POP command!" << std::endl;
+        code_generator.writePushPop(current_command_type, parser.arg1(), parser.arg2());
         break;
       default:
         std::cout << "Not-Interested command!" << std::endl;
     }
   }
-
-  std::cout << "No Commands found" << std::endl;
 
   // clean up
   std::cout.flush();
