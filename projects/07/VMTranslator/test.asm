@@ -1,13 +1,82 @@
-// push constant 10
-@10
+// push constant 17
+@17
 D=A
 @0
 A=M
 M=D
 @0
 M=M+1
-// neg
+// push constant 17
+@17
+D=A
 @0
 A=M
-A=A-1
-M=-M
+M=D
+@0
+M=M+1
+// eq
+@0
+M=M-1
+@0
+A=M
+D=M
+@0
+M=M-1
+@0
+A=M
+D=D-M
+@EQ0
+D;JEQ
+@0
+A=M
+M=0
+@EQEND0
+0;JMP
+(EQ0)
+@0
+A=M
+M=-1
+(EQEND0)
+@0
+M=M+1
+// push constant 17
+@17
+D=A
+@0
+A=M
+M=D
+@0
+M=M+1
+// push constant 16
+@16
+D=A
+@0
+A=M
+M=D
+@0
+M=M+1
+// eq
+@0
+M=M-1
+@0
+A=M
+D=M
+@0
+M=M-1
+@0
+A=M
+D=D-M
+@EQ1
+D;JEQ
+@0
+A=M
+M=0
+@EQEND1
+0;JMP
+(EQ1)
+@0
+A=M
+M=-1
+(EQEND1)
+@0
+M=M+1

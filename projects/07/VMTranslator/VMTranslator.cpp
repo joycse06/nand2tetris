@@ -61,7 +61,7 @@ int main(int argc, char** argv) {
   Parser parser(vm_file_stream);
   CommandType current_command_type;
   // CodeGenerator code_generator(std::cout);
-  CodeGenerator code_generator(asm_file_stream);
+  CodeGenerator code_generator(asm_file_stream, std::filesystem::path(vm_file_path).stem());
 
   // enter into Parse -> CodeGen Loop
   while(parser.hasMoreCommands()) {
