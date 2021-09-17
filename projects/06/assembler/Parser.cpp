@@ -14,9 +14,7 @@ CommandType Parser::commandType() {
 }
 
 std::string Parser::symbol() {
-  // std::cout << "Symbol called: " << this->current_command_type << " " << A_COMMAND ;
   if (this->current_command_type == A_COMMAND) {
-    // std::cout << "\ncurrent command: " << this->current_command;
       std::string symbol;
       symbol = this->current_command.substr(1);
     return symbol;
@@ -48,10 +46,7 @@ std::string Parser::comp() {
     std::size_t posOfEqual = command.find("=");
     std::size_t posOfSemicolon = command.find(";");
 
-    // std::cout << "posOfEqual: " << posOfEqual << " posOfSemicolon: " << posOfSemicolon;
-
     if (posOfEqual != std::string::npos) {
-      // std::cout << " posOfEqual not npos ";
       if (posOfSemicolon != std::string::npos) {
         return command.substr(posOfEqual + 1, (posOfSemicolon - posOfEqual - 1));
       } else {
@@ -90,7 +85,6 @@ bool Parser::hasMoreCommands() {
 
    while(std::getline(this->asm_file_ifstream, this->next_line)) {
      if (!string_utils::is_comment_or_empty(this->next_line)) {
-       // std::cout << "\nNext line is: " << this->next_line;
        string_utils::trim(this->next_line);
        return true;
      }
@@ -106,7 +100,6 @@ void Parser::advance() {
   }
 
   std::string sanitised_line = string_utils::remove_inline_comment(this->next_line);
-  // std::cout << "\n Sanitised Line: " << sanitised_line;
   char first_char = sanitised_line.at(0);
 
   if (first_char == '@') this->current_command_type = A_COMMAND;
